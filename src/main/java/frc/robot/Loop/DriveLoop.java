@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Preferences;
-
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import frc.robot.Telemetry;
@@ -20,7 +18,7 @@ import frc.robot.util.OI;
 
 public class DriveLoop extends Drive {
 
-    private static final double MaxSpeed = 3; // 6 meters per second desired top speed
+    private static final double MaxSpeed = 6;
     private static final double MaxAngularRate = Math.PI; // Half a rotation per second max angular velocity
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -41,6 +39,10 @@ public class DriveLoop extends Drive {
         DISABLED
     }
 
+    /**
+     * 
+     * @return a single instance of the DriveLoop class
+     */
     public static DriveLoop getInstance() {
         if (m_Instance == null) {
             m_Instance = new DriveLoop();
@@ -48,16 +50,23 @@ public class DriveLoop extends Drive {
         return m_Instance;
     }
 
+    /**
+     * Set the drive state
+     * 
+     * @param state drive state
+     */
     public void setDriveState(DriveStates state) {
         m_driveState = state;
     }
 
+    /**
+     * Constructor
+     */
     private DriveLoop() {
         super(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft,
-                    TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight);
+                TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight);
         oi = OI.getInstance();
         m_driveState = DriveStates.DISABLED;
-
 
         if (Utils.isSimulation()) {
             driveTrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -71,23 +80,32 @@ public class DriveLoop extends Drive {
     public void periodic() {
         switch (m_driveState) {
             case OPEN_LOOP:
-                this.operatorControl();;
+                this.operatorControl();
                 break;
             case DISABLED:
                 this.stop();
+                this.applyRequest(brake);
+                break;
+            default:
                 break;
         }
 
     }
 
+    /**
+     * Robot drives with operator input
+     */
     public void operatorControl() {
         super.applyRequest(drive.withVelocityX(-oi.getMappedDriveLeftY()
-                        * MaxSpeed)//Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
+                * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withVelocityY(
-                        -oi.getDriveLeftX() * MaxSpeed)//Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
+                        -oi.getDriveLeftX() * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withRotationalRate(-oi.getDriveRightX() * MaxAngularRate));
     }
 
+    /**
+     * Stop drivetrain
+     */
     public void stop() {
         super.applyRequest(drive
                 .withVelocityX(0)

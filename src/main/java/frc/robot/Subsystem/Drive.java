@@ -48,8 +48,15 @@ public class Drive extends SubsystemBase {
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
+    /**
+     * Applies a request to the drivetrain
+     * @param request
+     */
     public void applyRequest(SwerveRequest request) {
         driveTrain.setControl(request);
     }
+
+
+    
 
 }
