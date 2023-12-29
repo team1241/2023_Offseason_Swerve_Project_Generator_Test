@@ -43,8 +43,7 @@ public class DriveLoop extends Drive {
 
     public static DriveLoop getInstance() {
         if (m_Instance == null) {
-            m_Instance = new DriveLoop(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft,
-                    TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight);
+            m_Instance = new DriveLoop();
         }
         return m_Instance;
     }
@@ -53,11 +52,18 @@ public class DriveLoop extends Drive {
         m_driveState = state;
     }
 
-    public DriveLoop(SwerveDrivetrainConstants driveTrainConstants,
-            SwerveModuleConstants... modules) {
-        super(driveTrainConstants, modules);
+    private DriveLoop() {
+        super(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft,
+                    TunerConstants.FrontRight, TunerConstants.BackLeft, TunerConstants.BackRight);
         oi = OI.getInstance();
         m_driveState = DriveStates.DISABLED;
+
+
+        if (Utils.isSimulation()) {
+            super.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+        }
+
+        super.registerTelemetry(logger::telemeterize);
 
     }
 
@@ -65,7 +71,7 @@ public class DriveLoop extends Drive {
     public void periodic() {
         switch (m_driveState) {
             case OPEN_LOOP:
-                this.operatorControl();
+                this.operatorControl();;
                 break;
             case DISABLED:
                 this.stop();
@@ -75,25 +81,18 @@ public class DriveLoop extends Drive {
     }
 
     public void operatorControl() {
-        super.applyRequest(() -> drive
-                .withVelocityX(-oi.getMappedDriveLeftY()
-                        * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
+        super.applyRequest(drive.withVelocityX(-oi.getMappedDriveLeftY()
+                        * MaxSpeed)//Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withVelocityY(
-                        -oi.getDriveLeftX() * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
+                        -oi.getDriveLeftX() * MaxSpeed)//Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withRotationalRate(-oi.getDriveRightX() * MaxAngularRate));
-        if (Utils.isSimulation()) {
-            super.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-        }
-        super.registerTelemetry(logger::telemeterize);
-
     }
 
     public void stop() {
-        super.applyRequest(() -> drive
+        super.applyRequest(drive
                 .withVelocityX(0)
                 .withVelocityY(
                         0)
                 .withRotationalRate(0));
-
     }
 }
