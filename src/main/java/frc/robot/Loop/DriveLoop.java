@@ -96,10 +96,10 @@ public class DriveLoop extends Drive {
      * Robot drives with operator input
      */
     public void operatorControl() {
-        super.applyRequest(drive.withVelocityX(-oi.getMappedDriveLeftY()
+        super.applyRequest(drive.withVelocityX(oi.getMappedDriveLeftY() * MaxSpeed
                 * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withVelocityY(
-                        -oi.getDriveLeftX() * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
+                        -oi.getDriveLeftX() * MaxSpeed * Preferences.getDouble("OPEN_LOOP_GAIN", prefs.OPEN_LOOP_GAIN))
                 .withRotationalRate(-oi.getDriveRightX() * MaxAngularRate));
     }
 
