@@ -8,25 +8,26 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
  * so it can be used in command-based projects easily.
  */
-public class Drive extends SwerveDrivetrain implements Subsystem {
+public class Drive extends SubsystemBase {
+    protected SwerveDrivetrain driveTrain;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
     public Drive(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, OdometryUpdateFrequency, modules);
+        driveTrain = new SwerveDrivetrain(driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
     }
     public Drive(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, modules);
+        driveTrain = new SwerveDrivetrain(driveTrainConstants, modules);
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -42,13 +43,13 @@ public class Drive extends SwerveDrivetrain implements Subsystem {
             m_lastSimTime = currentTime;
 
             /* use the measured time delta, get battery voltage from WPILib */
-            updateSimState(deltaTime, RobotController.getBatteryVoltage());
+            driveTrain.updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
     public void applyRequest(SwerveRequest request) {
-        this.setControl(request);
+        driveTrain.setControl(request);
     }
 
 }

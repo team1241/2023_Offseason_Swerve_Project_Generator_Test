@@ -60,10 +60,10 @@ public class DriveLoop extends Drive {
 
 
         if (Utils.isSimulation()) {
-            super.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+            driveTrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         }
 
-        super.registerTelemetry(logger::telemeterize);
+        driveTrain.registerTelemetry(logger::telemeterize);
 
     }
 
