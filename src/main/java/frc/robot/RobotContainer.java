@@ -56,7 +56,7 @@ public class RobotContainer {
   }
 
   public RobotContainer() {
-    System.out.println("Cringe");
+    System.out.println("Pog");
     configureBindings();
   }
 
